@@ -74,8 +74,10 @@ pacman -S --noconfirm xf86-video-ati xf86-video-intel xf86-video-nouveau xf86-vi
 pacman -S --noconfirm xf86-input-libinput
 pacman -S --noconfirm acpi
 
-useradd -mU -s /usr/bin/zsh -G wheel,uucp,video,audio,storage,games,input "$user"
-chsh -s /usr/bin/zsh
+exit
+
+arch-chroot /mnt useradd -mU -s /usr/bin/zsh -G wheel,uucp,video,audio,storage,games,input "$user"
+arch-chroot /mnt chsh -s /usr/bin/zsh
 
 echo "$user:$password" | chpasswd --root /mnt
 echo "root:$password" | chpasswd --root /mnt
