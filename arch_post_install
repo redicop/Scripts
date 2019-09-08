@@ -1,0 +1,25 @@
+#!/bin/bash
+# WARNING: this script will destroy data on the selected disk.
+# This script can be run by executing the following:
+
+arch-chroot /mnt
+
+ln -sf /usr/share/zoneinfo/Europe/Athens /etc/localtime
+hwclock --systohc
+locale-gen
+echo "LANG=en_GB.UTF-8" > /mnt/etc/locale.conf
+echo "${hostname}" > /mnt/etc/hostname
+pacman -S grub efibootmgr
+grub-install --target=x86_64-efi --efi-directory /boot --boot-directory /boot --removable
+grub-mkconfig -o /boot/grub/grub.cfg
+systemctl enable dhcpcd
+
+pacman -S xf86-video-ati xf86-video-intel xf86-video-nouveau xf86-video-vesa
+pacman -S xf86-input-libinput
+pacman -S acpi
+
+arch-chroot /mnt useradd -mU -s /usr/bin/zsh -G wheel,uucp,video,audio,storage,games,input "$user"
+arch-chroot /mnt chsh -s /usr/bin/zsh
+
+echo "$user:$password" | chpasswd --root /mnt
+echo "root:$password" | chpasswd --root /mnt
