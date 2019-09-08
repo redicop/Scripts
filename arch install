@@ -44,9 +44,8 @@ part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
 wipefs "${part_boot}"
 wipefs "${part_root}"
 
-mkfs.vfat -F32 "${part_boot}"
-mkswap "${part_swap}"
-mkfs.f2fs -f "${part_root}"
+mkfs.fat -F32 "${part_boot}"
+mkfs.ext4 -f "${part_root}"
 
 mount "${part_root}" /mnt
 mkdir /mnt/boot
@@ -56,7 +55,7 @@ mount "${part_boot}" /mnt/boot
 
 
 pacstrap /mnt base base-devel
-ggenfstab -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 
 
 arch-chroot /mnt
@@ -66,7 +65,14 @@ hwclock --systohc
 locale-gen
 echo "LANG=en_GB.UTF-8" > /mnt/etc/locale.conf
 echo "${hostname}" > /mnt/etc/hostname
+pacman -S grub efibootmgr
+grub-install --target=x86_64-efi --efi-directory /boot --boot-directory /boot --removable
+grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable dhcpcd
+
+pacman -S xf86-video-ati xf86-video-intel xf86-video-nouveau xf86-video-vesa
+pacman -S xf86-input-libinput
+pacman -S acpi
 
 arch-chroot /mnt useradd -mU -s /usr/bin/zsh -G wheel,uucp,video,audio,storage,games,input "$user"
 arch-chroot /mnt chsh -s /usr/bin/zsh
